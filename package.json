@@ -36,7 +36,7 @@
       "react-app/jest"
     ]
   },
-  "proxy": "https://binaryquotefront.herokuapp.com",
+  "proxy": "https://binaryquotations.herokuapp.com",
   "browserslist": {
     "production": [
       ">0.2%",

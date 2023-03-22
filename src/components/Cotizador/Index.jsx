@@ -155,7 +155,7 @@ const ServicesPage = () => {
       }    
     
     /*
-    await fetch("/createQuotation", {
+    await fetch("https://binaryquotations.herokuapp.com/createQuotation", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     });
     
     const Quotation = ({ quotation, total, quotationBrief }) => {
+     var totalSum = parseFloat(total).toFixed(2).toString().replace(/\d(?=(\d{3})+\.)/g, '$&,');
     return (
     <Document>
     <Page>
@@ -103,27 +104,52 @@ const styles = StyleSheet.create({
         </View> 
         <View style={styles.tableCol}> 
           <Text style={styles.tableCell}>Cantidad</Text> 
-        </View> 
+        </View>
         <View style={styles.tableCol}> 
           <Text style={styles.tableCell}>Total (MXN)</Text> 
         </View> 
       </View>
-      {quotation.map(service => (
+      {quotation.map((service) => {
+        var precioTotal = parseFloat(service.totalPrice).toFixed(2).toString().replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        var price = parseFloat(service.price).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        if(quotation.paymentPlan === "pago_fijo"){        
+        var cantidad = parseFloat(service.quantity).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        } else if (quotation.paymentPlan === "pago_mensual"){
+          //var cantidadMensual = parseFloat(service.quantityPerMonth).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          //var precioMensual = parseFloat(service.pricePerMonth).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+        return (
       <View style={styles.tableRow} key={service.name}> 
         <View style={styles.tableCol}> 
+        {service.paymentPlan === "pago_fijo" && 
           <Text style={styles.tableCell}>{service.name}</Text> 
+        }
+        {service.paymentPlan === "pago_mensual" && 
+          <Text style={styles.tableCell}>Servicio mensual de {service.quantityPerMonth} {service.name}</Text> 
+        }
+        </View> 
+        <View style={styles.tableCol}>
+        {service.paymentPlan === "pago_fijo" && 
+          <Text style={styles.tableCell}>${price}</Text> 
+        }
+        {service.paymentPlan === "pago_mensual" && 
+         <Text style={styles.tableCell}>${service.pricePerMonth}</Text>  
+        }
         </View> 
         <View style={styles.tableCol}> 
-          <Text style={styles.tableCell}>${service.price}</Text> 
+        {service.paymentPlan === "pago_fijo" && 
+          <Text style={styles.tableCell}>{cantidad}</Text> 
+        }
+        {service.paymentPlan === "pago_mensual" && 
+          <Text style={styles.tableCell}>{service.monthQuantity} Meses</Text> 
+        }
         </View> 
         <View style={styles.tableCol}> 
-          <Text style={styles.tableCell}>{service.quantity}</Text> 
-        </View> 
-        <View style={styles.tableCol}> 
-          <Text style={styles.tableCell}>${service.totalPrice}</Text> 
+          <Text style={styles.tableCell}>${precioTotal}</Text> 
         </View> 
       </View>
-      ))}
+        )
+      })}
       <View style={styles.tableRow}> 
         <View style={styles.tableCol}> 
           <Text style={styles.totalFinal}>Total</Text> 
@@ -131,7 +157,7 @@ const styles = StyleSheet.create({
         <View style={styles.tableCol}>continue</View>
         <View style={styles.tableCol}>continue</View>
         <View style={styles.tableCol}> 
-          <Text style={styles.totalFinal}>${total}</Text> 
+          <Text style={styles.totalFinal}>${totalSum}</Text> 
         </View> 
       </View> 
     </View>

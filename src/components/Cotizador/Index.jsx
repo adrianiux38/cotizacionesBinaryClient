@@ -37,6 +37,7 @@ const ServicesPage = () => {
   const [visible, setVisible] = useState(false);
   const changeVisibility = () => {
     if (quotation.length > 0){
+      setQuotationBrief('');
       setVisible(!visible)
     }
   }
@@ -88,7 +89,7 @@ const ServicesPage = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data);
+        //console.log(data);
         const modifiedServices = data.map(service => {
           service.precio = parseFloat(service.precio).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
           return service;
@@ -105,45 +106,77 @@ const ServicesPage = () => {
     setQuotationBrief(e.target.value)
   }
 
-  
-
-  
-
-  
-
- 
 
   const handleCreateQuotation = async () => {
     const servicesCopy = services.map(service => {
-      var quantity = getValueFromTextField(service.id);
-     // if (service.id === id) {
-       return {...service, quantity};
-     // }
-       //return service;
+      if(service.esquema !== "pago_mensual"){
+        //primero tenemos que ver que el esquema de pago sea diferente a mensual
+        var quantityxmonth = getValueFromTextField(service.id);
+        //primero tenemos que ver qué servicios son los que se convirtieron a mensuales
+        var monthConversionselected = checkMonthConvert(`checkmonth${service.id}`);
+        //luego tenemos que ver la cantidad de meses que va a estar activo el servicio
+        if (monthConversionselected){
+          //aquí convertimos el esquema de pago del servicio a pago_mensual 
+          service.esquema = "pago_mensual";
+          delete service.quantity;
+          var monthQuantity = getMonthQuantity(`monthquantity${service.id}`);
+          return {...service, quantityxmonth, monthQuantity};
+        } else {
+          //si es pago mensual desde el inicio (no era servicio de pago único y luego se convirtió a mensual) 
+          return {...service, quantityxmonth}
+        }
+      } else {
+        var quantity = getValueFromTextField(service.id);
+        return {...service, quantity}
+      }
+
      });
+
      const servicesCopyFinal = servicesCopy.map(service => {
       var selected = checkSelected(`check${service.id}`);
-     // if (service.id === id) {
        return {...service, selected};
-     // }
-       //return service;
      });
       let quotation = [];
       servicesCopyFinal.forEach(service => {
-        if (service.selected && service.quantity) {
-          quotation.push({
-            name: service.nombre,
-            description: service.descripcion,
-            price: service.precio,
-            paymentPlan: service.esquema,
-            quantity: service.quantity,
-            totalPrice: parseFloat(service.precio).toFixed(2) * service.quantity
-          });
+        if (service.selected) {
+          if(service.esquema === "pago_mensual"){
+            if(service.quantityxmonth && service.monthQuantity){
+              var totalMonths = service.monthQuantity;
+              var totalQuantity = totalMonths * service.quantityxmonth;
+              var pricePerMonth = service.quantityxmonth * service.precio;
+              //aquí tenemos que si el esquema es pago_mensual, entonces va a mandar el quantityxmonth y el monthQuantity
+              quotation.push({
+                name: service.nombre,
+                description: service.descripcion,
+                price: service.precio,
+                paymentPlan: service.esquema,
+                monthQuantity: service.monthQuantity,
+                quantityPerMonth: service.quantityxmonth,
+                pricePerMonth: pricePerMonth,
+                totalQuantity: totalQuantity,
+                totalPrice: parseFloat(service.precio).toFixed(2) * totalQuantity
+              });
+            } else {
+              alert("selecciona la cantidad x mes y número de meses de los servicios mensuales");
+            }
+          } else if (service.quantity) {
+            quotation.push({
+              name: service.nombre,
+              description: service.descripcion,
+              price: service.precio,
+              paymentPlan: service.esquema,
+              quantity: service.quantity,
+              totalPrice: parseFloat(service.precio).toFixed(2) * service.quantity
+            });
+          } else {
+            alert("Escribe la cantidad de todos los servicios que estás seleccionando");
+          }
         }
       });
+      console.log(quotation);
       if(quotation.length > 0){
+        console.log("esta es la cotización");
         setVisible(true);
-        console.log(quotation)
         setQuotation(quotation);
         let totalPrice = 0;
         quotation.forEach(service => {
@@ -173,8 +206,19 @@ const ServicesPage = () => {
 
   const getValueFromTextField = (id) => {
     const textField = document.querySelector(`input[id="${id}"][name="quantity"]`);
-    console.log(textField.value);
     return textField.value;
+  }
+
+  //Obtener la cantidad de meses que va a estar activo el servicio 
+  const getMonthQuantity = (id) => {
+    const textField = document.querySelector(`input[id="${id}"][name="monthquantity"]`);
+    return textField.value;
+  }
+
+  //verificar si el servicio se seleccionó para convertirlo en mensual
+  const checkMonthConvert = (id) => {
+    const monthConvertSelected = document.querySelector(`input[id="${id}"][type="checkbox"]`);
+    return monthConvertSelected.checked;
   }
 
   const checkSelected = (id) => {
@@ -208,7 +252,9 @@ const ServicesPage = () => {
             <StyledTableCell align="center">Descripción</StyledTableCell>
             <StyledTableCell align="center">Precio&nbsp;</StyledTableCell>
             <StyledTableCell align="center">Esquema de pago&nbsp;</StyledTableCell>
-            <StyledTableCell align="center">Cantidad&nbsp;</StyledTableCell>
+            <StyledTableCell align="center">Convertir mensual?&nbsp;</StyledTableCell>
+            <StyledTableCell align="center">Cantidad (total/x mes)&nbsp;</StyledTableCell>
+            <StyledTableCell align="center">No. Meses&nbsp;</StyledTableCell>
             <StyledTableCell align="center">Seleccionar&nbsp;</StyledTableCell>
           </StyledTableRow>
         </TableHead>
@@ -221,6 +267,14 @@ const ServicesPage = () => {
               <StyledTableCell align='center'>{service.descripcion}</StyledTableCell>
               <StyledTableCell align='center'>${service.precio}</StyledTableCell>
               <StyledTableCell align='center'>{service.esquema}</StyledTableCell>
+              <StyledTableCell align='center'>
+                {service.esquema === "pago_fijo" && 
+                  <Input
+                    type="checkbox"
+                    id={`checkmonth${service.id}`}
+                  />
+                }
+              </StyledTableCell>
               <StyledTableCell align='center'>
               <Box
                 component="form"
@@ -238,10 +292,28 @@ const ServicesPage = () => {
               </Box>
               </StyledTableCell>
               <StyledTableCell align='center'>
+              <Box
+                component="form"
+                sx={{
+                  '& > :not(style)': { m: 1, width: '25ch'},
+                }}
+                noValidate
+                autoComplete="off"
+              >
+                
+                <TextField
+                  name='monthquantity'
+                  type="number"
+                  id={`monthquantity${service.id}`}
+                />
+              
+              </Box>
+              </StyledTableCell>
+              <StyledTableCell align='center'>
               <Input
-                      type="checkbox"
-                      id={`check${service.id}`}
-                    />
+                type="checkbox"
+                id={`check${service.id}`}
+                />
               </StyledTableCell>
           </StyledTableRow>
               ))}
@@ -286,14 +358,24 @@ const ServicesPage = () => {
             <CardBody>
               {quotation.map(service => (
                 <Row key={service.name}>
+                {service.paymentPlan === "pago_fijo" && 
                   <Col>
                     <p>
                     {service.name} ({Number(service.quantity).toLocaleString()}): ${Number(service.totalPrice).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   </Col>
-                </Row>
+                }
+                {service.paymentPlan === "pago_mensual" &&
+                  <Col>
+                  <p>
+                  Servicio mensual de <span style={{fontWeight:'bold'}}>{Number(service.totalQuantity).toLocaleString()} {service.name} </span> al mes: ${Number(service.totalPrice).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </p>
+                </Col>
+                } 
+                </Row> 
               ))}
-            </CardBody>
+              </CardBody>
+           
             <CardFooter>
               <Row>
                 <Col>

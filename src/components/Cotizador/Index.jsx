@@ -112,8 +112,9 @@ const ServicesPage = () => {
       if(service.esquema == "pago_mensual"){
         //primero tenemos que ver que el esquema de pago sea diferente a mensual
         var quantityxmonth = getValueFromTextField(service.id);
+        var monthQuantity = getMonthQuantity(`monthquantity${service.id}`);
         //si es pago mensual desde el inicio (no era servicio de pago único y luego se convirtió a mensual) 
-        return {...service, quantityxmonth}
+        return {...service, quantityxmonth, monthQuantity}
       } else if (service.esquema == "pago_fijo") {
         //primero tenemos que ver qué servicios son los que se convirtieron a mensuales
         var monthConversionselected = checkMonthConvert(`checkmonth${service.id}`);
@@ -151,23 +152,6 @@ const ServicesPage = () => {
                 price: service.precio,
                 paymentPlan: service.esquema,
                 monthQuantity: service.monthQuantity,
-                quantityPerMonth: service.quantityxmonth,
-                pricePerMonth: pricePerMonth,
-                totalQuantity: totalQuantity,
-                totalPrice: parseFloat(service.precio).toFixed(2) * totalQuantity
-              });
-            } else if (service.quantityxmonth) {
-              //Esta es cuando el precio el mensual desde un inicio 
-
-              var totalQuantity = service.quantityxmonth;
-              var pricePerMonth = service.quantityxmonth * service.precio;
-              //aquí tenemos que si el esquema es pago_mensual, entonces va a mandar el quantityxmonth y el monthQuantity
-              quotation.push({
-                name: service.nombre,
-                description: service.descripcion,
-                price: service.precio,
-                paymentPlan: service.esquema,
-                monthQuantity: totalQuantity,
                 quantityPerMonth: service.quantityxmonth,
                 pricePerMonth: pricePerMonth,
                 totalQuantity: totalQuantity,
@@ -401,7 +385,7 @@ const ServicesPage = () => {
                 {service.paymentPlan === "pago_mensual" &&
                   <Col>
                   <p style={{alignContent:'center'}}>
-                  Servicio mensual de <span style={{fontWeight:'bold'}}>{Number(service.totalQuantity).toLocaleString()} {service.name} </span> al mes: ${Number(service.totalPrice).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  Servicio mensual de {Number(service.quantityPerMonth).toLocaleString()} {service.name}<span style={{fontWeight:'bold'}}>(X{Number(service.monthQuantity).toLocaleString()} meses)</span>: ${Number(service.totalPrice).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </Col>
                 } 

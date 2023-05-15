@@ -81,7 +81,7 @@ const ServicesPage = () => {
   }, []);
 
   const getData = async () => {
-    fetch("https://localhost:3001/getData", {
+    fetch("http://localhost:3001/getData", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

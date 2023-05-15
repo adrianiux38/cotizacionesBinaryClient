@@ -42,7 +42,7 @@ const CreateService = () => {
       };
 
       const handleAddService = async () => {
-        await fetch("https://localhost:3001/createService", {
+        await fetch("http://localhost:3001/createService", {
            method: "POST",
            headers: {
              "Content-Type": "application/json",

@@ -42,7 +42,7 @@ const CreateService = () => {
       };
 
       const handleAddService = async () => {
-        await fetch("https://binaryquotations.herokuapp.com/createService", {
+        await fetch("https://localhost:3001/createService", {
            method: "POST",
            headers: {
              "Content-Type": "application/json",

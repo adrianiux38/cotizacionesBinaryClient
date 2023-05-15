@@ -81,7 +81,7 @@ const ServicesPage = () => {
   }, []);
 
   const getData = async () => {
-    fetch("https://binaryquotations.herokuapp.com/getData", {
+    fetch("https://localhost:3001/getData", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -156,10 +156,8 @@ const ServicesPage = () => {
                 totalQuantity: totalQuantity,
                 totalPrice: parseFloat(service.precio).toFixed(2) * totalQuantity
               });
-            } else {
-              alert("selecciona la cantidad x mes y número de meses de los servicios mensuales");
-            }
-          } else if (service.quantity) {
+            } 
+          } else if (service.esquema === "pago_fijo" && service.quantity) {
             quotation.push({
               name: service.nombre,
               description: service.descripcion,
@@ -168,8 +166,6 @@ const ServicesPage = () => {
               quantity: service.quantity,
               totalPrice: parseFloat(service.precio).toFixed(2) * service.quantity
             });
-          } else {
-            alert("Escribe la cantidad de todos los servicios que estás seleccionando");
           }
         }
       });

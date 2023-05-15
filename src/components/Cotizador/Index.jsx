@@ -384,7 +384,7 @@ const ServicesPage = () => {
                 {service.paymentPlan === "pago_mensual" &&
                   <Col>
                   <p style={{alignContent:'center'}}>
-                  Servicio mensual de <span style={{fontWeight:'bold'}}>{Number(service.totalQuantity).toLocaleString()} {service.name} </span> al mes: ${Number(service.totalPrice).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  Servicio mensual de {Number(service.quantityPerMonth).toLocaleString()} {service.name} al mes <span style={{fontWeight:'bold'}}>({Number(service.totalQuantity).toLocaleString()} en total)</span> : ${Number(service.totalPrice).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </Col>
                 } 

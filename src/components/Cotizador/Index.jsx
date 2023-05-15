@@ -172,7 +172,6 @@ const ServicesPage = () => {
       });
       console.log(quotation);
       if(quotation.length > 0){
-        console.log("esta es la cotización");
         setVisible(true);
         setQuotation(quotation);
         let totalPrice = 0;

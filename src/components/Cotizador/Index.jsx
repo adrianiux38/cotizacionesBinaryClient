@@ -156,7 +156,24 @@ const ServicesPage = () => {
                 totalQuantity: totalQuantity,
                 totalPrice: parseFloat(service.precio).toFixed(2) * totalQuantity
               });
-            } 
+            } else if (service.quantityxmonth) {
+              //Esta es cuando el precio el mensual desde un inicio 
+
+              var totalQuantity = service.quantityxmonth;
+              var pricePerMonth = service.quantityxmonth * service.precio;
+              //aquí tenemos que si el esquema es pago_mensual, entonces va a mandar el quantityxmonth y el monthQuantity
+              quotation.push({
+                name: service.nombre,
+                description: service.descripcion,
+                price: service.precio,
+                paymentPlan: service.esquema,
+                monthQuantity: totalQuantity,
+                quantityPerMonth: service.quantityxmonth,
+                pricePerMonth: pricePerMonth,
+                totalQuantity: totalQuantity,
+                totalPrice: parseFloat(service.precio).toFixed(2) * totalQuantity
+              });
+            }
             //Nos falta pasarle la quantity cuando es pago fijo 
           } else if (service.esquema === "pago_fijo" && service.quantity) {
             quotation.push({

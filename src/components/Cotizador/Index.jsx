@@ -109,9 +109,12 @@ const ServicesPage = () => {
 
   const handleCreateQuotation = async () => {
     const servicesCopy = services.map(service => {
-      if(service.esquema !== "pago_mensual"){
+      if(service.esquema == "pago_mensual"){
         //primero tenemos que ver que el esquema de pago sea diferente a mensual
         var quantityxmonth = getValueFromTextField(service.id);
+        //si es pago mensual desde el inicio (no era servicio de pago único y luego se convirtió a mensual) 
+        return {...service, quantityxmonth}
+      } else if (service.esquema == "pago_fijo") {
         //primero tenemos que ver qué servicios son los que se convirtieron a mensuales
         var monthConversionselected = checkMonthConvert(`checkmonth${service.id}`);
         //luego tenemos que ver la cantidad de meses que va a estar activo el servicio
@@ -119,17 +122,14 @@ const ServicesPage = () => {
           //aquí convertimos el esquema de pago del servicio a pago_mensual 
           service.esquema = "pago_mensual";
           delete service.quantity;
+          var quantityxmonth = getValueFromTextField(service.id);
           var monthQuantity = getMonthQuantity(`monthquantity${service.id}`);
           return {...service, quantityxmonth, monthQuantity};
         } else {
-          //si es pago mensual desde el inicio (no era servicio de pago único y luego se convirtió a mensual) 
-          return {...service, quantityxmonth}
+          var quantity = getValueFromTextField(service.id);
+          return {...service, quantity}
         }
-      } else {
-        var quantity = getValueFromTextField(service.id);
-        return {...service, quantity}
       }
-
      });
 
      const servicesCopyFinal = servicesCopy.map(service => {
@@ -157,6 +157,7 @@ const ServicesPage = () => {
                 totalPrice: parseFloat(service.precio).toFixed(2) * totalQuantity
               });
             } 
+            //Nos falta pasarle la quantity cuando es pago fijo 
           } else if (service.esquema === "pago_fijo" && service.quantity) {
             quotation.push({
               name: service.nombre,
@@ -321,13 +322,32 @@ const ServicesPage = () => {
        
       </Row>
       <Row>
-        <Col>
-          <div style={{position: 'fixed', top:'0%', zIndex:2, padding: '100%', display: visible ? "block" : "none", backgroundColor: 'rgba(0, 0, 0, 0.5)', borderRadius: '5px', overflow:'hidden'}} >
-          <Card style={{position: 'fixed', top:'30%', left: '30%', paddingLeft: '8%', paddingRight:'8%', display: visible ? "block" : "none", backgroundColor: 'white', borderRadius: '5px'}}>
-              <Button variant="contained" onClick={changeVisibility} style={{display:'flex', backgroundColor:'red', marginLeft:'90%', marginTop: '5%'}}>
-                Cerrar
-              </Button>
-            <h2>Cotización</h2>
+      <Col>
+      <div style={{
+        position: 'fixed', 
+        top: 0, 
+        left: 0,
+        zIndex: 2, 
+        height: '100%', 
+        width: '100%', 
+        display: visible ? "flex" : "none", 
+        alignItems: 'center', 
+        justifyContent: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      }}>
+        <Card style={{
+          display: visible ? "block" : "none", 
+          backgroundColor: 'white', 
+          borderRadius: '5px', 
+          padding: '2%', 
+          maxWidth: '80%', 
+          textAlign: 'center',
+          overflow: 'auto',
+        }}>            
+          <Button variant="contained" onClick={changeVisibility} style={{display:'flex', backgroundColor:'red', position: 'relative', top: '2%', right: '2%', float:'right'}}>
+            Cerrar
+          </Button>
+            <h2 style={{textAlign:'center', marginLeft:'12%'}}>Cotización</h2>
             <Box
             component="form"
             sx={{
@@ -356,14 +376,14 @@ const ServicesPage = () => {
                 <Row key={service.name}>
                 {service.paymentPlan === "pago_fijo" && 
                   <Col>
-                    <p>
+                    <p style={{alignContent:'center'}}>
                     {service.name} ({Number(service.quantity).toLocaleString()}): ${Number(service.totalPrice).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </p>
                   </Col>
                 }
                 {service.paymentPlan === "pago_mensual" &&
                   <Col>
-                  <p>
+                  <p style={{alignContent:'center'}}>
                   Servicio mensual de <span style={{fontWeight:'bold'}}>{Number(service.totalQuantity).toLocaleString()} {service.name} </span> al mes: ${Number(service.totalPrice).toLocaleString('en', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </p>
                 </Col>
@@ -380,9 +400,9 @@ const ServicesPage = () => {
               </Row>
               <Row>
                 <Col>
-                  <Button variant="contained" onClick={createPdf} style={{display: 'flex', marginBottom: '5%', marginLeft: '23%'}}>
-                    Generar cotización
-                  </Button>
+                <Button variant="contained" onClick={createPdf} style={{display: 'flex', marginBottom: '5%', margin: '0 auto'}}>
+                  Generar cotización
+                </Button>
                   {pdfVisible && (
                     <PDFDownloadLink
                       document={<Quotation quotation={quotation} total={total} quotationBrief={quotationBrief}/>}

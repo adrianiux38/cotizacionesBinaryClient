@@ -111,7 +111,8 @@ const styles = StyleSheet.create({
       </View>
       {quotation.map((service) => {
         var precioTotal = parseFloat(service.totalPrice).toFixed(2).toString().replace(/\d(?=(\d{3})+\.)/g, '$&,');
-        var price = parseFloat(service.price).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        var price = parseFloat(service.price).toFixed(2).toString().replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        var pricePerMonthWithCommas = parseFloat(service.pricePerMonth).toFixed(2).toString().replace(/\d(?=(\d{3})+\.)/g, '$&,');
         function numberWithCommas(x) {
           const number = parseInt(x, 10); // Parse the string as an integer
           return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -123,7 +124,7 @@ const styles = StyleSheet.create({
           <Text style={styles.tableCell}>{service.name}</Text> 
         }
         {service.paymentPlan === "pago_mensual" && 
-          <Text style={styles.tableCell}>Servicio mensual de {service.quantityPerMonth} {service.name}</Text> 
+          <Text style={styles.tableCell}>Servicio mensual de {numberWithCommas(service.quantityPerMonth)} {service.name}</Text> 
         }
         </View> 
         <View style={styles.tableCol}>
@@ -131,7 +132,7 @@ const styles = StyleSheet.create({
           <Text style={styles.tableCell}>${price}</Text> 
         }
         {service.paymentPlan === "pago_mensual" && 
-         <Text style={styles.tableCell}>${service.pricePerMonth}</Text>  
+         <Text style={styles.tableCell}>${pricePerMonthWithCommas}</Text>  
         }
         </View> 
         <View style={styles.tableCol}> 
